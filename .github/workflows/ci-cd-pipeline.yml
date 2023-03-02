@@ -1,0 +1,31 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+permissions:
+  id-token: write
+  contents: read
+env:
+  AWS_REGION: ap-northeast-2
+
+jobs:
+  registry:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Create ECR
+        id: create-registry
+        run: |
+          cd terraform/registry/
+
+          terraform init \
+          -backend-config=config/backend-config.tf \
